@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLADE OF THE NIGHT</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: #050814;
+            color: #d0e0ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        /* Header Styling */
+        .game-header {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .game-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            color: #00f0ff;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6), 0 0 20px rgba(0, 100, 255, 0.4);
+            text-transform: uppercase;
+        }
+
+        .game-subtitle {
+            font-size: 0.95rem;
+            color: #8fa0cf;
+            letter-spacing: 1.5px;
+            margin-top: 2px;
+        }
+
+        /* Container Layout */
+        .game-container {
+            width: 100%;
+            max-width: 980px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Top HUD */
+        .hud-top {
+            width: 100%;
+            background: linear-gradient(180deg, #0d152d 0%, #080d1e 100%);
+            border: 1px solid #1e3a6e;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.5), inset 0 0 8px rgba(0, 240, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hud-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .hud-value {
+            color: #ffffff;
+            text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+        }
+
+        .hp-bar-container {
+            width: 130px;
+            height: 14px;
+            background: #10182b;
+            border: 1px solid #2a4880;
+            border-radius: 7px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hp-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff2a55, #ff6b8b);
+            width: 100%;
+            transition: width 0.2s ease-out;
+            box-shadow: 0 0 8px rgba(255, 42, 85, 0.8);
+        }
+
+        .btn-restart {
+            background: linear-gradient(180deg, #1e3c72 0%, #10254c 100%);
+            color: #00f0ff;
+            border: 1px solid #00f0ff;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+        }
+
+        .btn-restart:hover {
+            background: #00f0ff;
+            color: #050814;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+        }
+
+        /* Canvas Wrapper */
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border: 2px solid #1a3b70;
+            border-radius: 10px;
+            box-shadow: 0 0 25px rgba(0, 150, 255, 0.25), inset 0 0 15px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* Notification Banner Below Canvas */
+        .message-banner {
+            width: 100%;
+            background: rgba(10, 20, 40, 0.9);
+            border: 1px solid #00a8ff;
+            border-radius: 6px;
+            padding: 8px 12px;
+            text-align: center;
+            color: #00f0ff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-shadow: 0 0 6px rgba(0, 240, 255, 0.5);
+            min-height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Bottom Controls & Shop Panels */
+        .bottom-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+        }
+
+        @media (max-width: 720px) {
+            .bottom-panels {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: linear-gradient(180deg, #0c162c 0%, #070c18 100%);
+            border: 1px solid #1b3566;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .panel-title {
+            font-size: 1rem;
+            color: #00f0ff;
+            margin-bottom: 8px;
+            font-weight: bold;
+            border-bottom: 1px solid #1b3566;
+            padding-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Controls Grid */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px 12px;
+            font-size: 0.85rem;
+            color: #a0b5e0;
+        }
+
+        .key-badge {
+            background: #142442;
+            border: 1px solid #2a4880;
+            color: #ffffff;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        /* Shop Buttons */
+        .shop-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .shop-btn {
+            background: linear-gradient(180deg, #14284d 0%, #0b1730 100%);
+            border: 1px solid #254a8a;
+            color: #d0e0ff;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .shop-btn:hover:not(:disabled) {
+            background: linear-gradient(180deg, #1c3c78 0%, #12254d 100%);
+            border-color: #00f0ff;
+            color: #ffffff;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+        }
+
+        .shop-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: #1a2a47;
+        }
+
+        .cost-tag {
+            color: #ffd700;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-header">
+        <h1 class="game-title">BLADE OF THE NIGHT</h1>
+        <div class="game-subtitle">A moonlit pixel-art demon-hunting adventure.</div>
+    </div>
+
+    <div class="game-container">
+        <!-- TOP HUD -->
+        <div class="hud-top">
+            <div class="hud-stat">
+                <span>❤️ HP:</span>
+                <div class="hp-bar-container">
+                    <div id="hp-bar-fill" class="hp-bar-fill"></div>
+                </div>
+                <span id="hp-text" class="hud-value">20/20</span>
+            </div>
+            <div class="hud-stat">
+                <span>🪙 Coins:</span>
+                <span id="coins-text" class="hud-value" style="color:#ffd700;">0</span>
+            </div>
+            <div class="hud-stat">
+                <span>🌙 Stage:</span>
+                <span id="stage-text" class="hud-value" style="color:#00f0ff;">Forest Path (1/4)</span>
+            </div>
+            <div class="hud-stat">
+                <span id="objective-label">Objective:</span>
+                <span id="objective-text" class="hud-value" style="color:#ff4466;">Defeat Hand Demon</span>
+            </div>
+            <button id="btn-restart" class="btn-restart">Restart Game</button>
+        </div>
+
+        <!-- CANVAS VIEWPORT -->
+        <div class="canvas-wrapper">
+            <canvas id="gameCanvas" width="960" height="540"></canvas>
+        </div>
+
+        <!-- NOTIFICATION BANNER -->
+        <div id="message-banner" class="message-banner">
+            Explore the night. Reach the blue checkpoint, then defeat the boss!
+        </div>
+
+        <!-- BOTTOM PANELS -->
+        <div class="bottom-panels">
+            <!-- CONTROLS PANEL -->
+            <div class="panel">
+                <div class="panel-title">🎮 CONTROLS</div>
+                <div class="controls-grid">
+                    <div><span class="key-badge">←</span> <span class="key-badge">→</span> Move Left / Right</div>
+                    <div><span class="key-badge">E</span> Sword Slash Attack</div>
+                    <div><span class="key-badge">↑</span> / <span class="key-badge">Space</span> Jump</div>
+                    <div><span class="key-badge">Z</span> Dash (Invincible Streak)</div>
+                    <div><span class="key-badge">Enter</span> Restart (on Death/Win)</div>
+                </div>
+            </div>
+
+            <!-- SHOP PANEL -->
+            <div class="panel">
+                <div class="panel-title">🛒 BOSS REWARD SHOP</div>
+                <div class="shop-grid">
+                    <button id="shop-hp" class="shop-btn">
+                        <span>❤️ +10 Max HP</span>
+                        <span class="cost-tag">🪙 50 Coins</span>
+                    </button>
+                    <button id="shop-dmg" class="shop-btn">
+                        <span>⚔️ +2 Sword Damage</span>
+                        <span class="cost-tag">🪙 50 Coins</span>
+                    </button>
+                    <button id="shop-speed" class="shop-btn">
+                        <span>👟 +Movement Speed</span>
+                        <span class="cost-tag">🪙 50 Coins</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME CONSTANTS & CONFIGURATION ---
+        const CANVAS_WIDTH = 960;
+        const CANVAS_HEIGHT = 540;
+        const GROUND_Y = 460;
+        const LEVEL_WIDTH = 3200;
+        const CHECKPOINT_X = 160;
+
+        // Stage Configuration Data
+        const STAGE_CONFIGS = [
+            {
+                number: 1,
+                name: "Forest Path",
+                skyTop: "#050b1e",
+                skyBottom: "#0e1a38",
+                moonColor: "#d0e8ff",
+                moonType: "crescent",
+                mountainsColor: "#0b152d",
+                treesColor: "#081024",
+                groundTop: "#00f0ff",
+                groundBody: "#0d1b36",
+                lanternColor: "#ffaa00",
+                bossName: "Hand Demon",
+                bossHp: 20,
+                bossDmg: 2,
+                bossColor: "#a82050",
+                enemyCount: 5
+            },
+            {
+                number: 2,
+                name: "Mountain Village",
+                skyTop: "#140524",
+                skyBottom: "#280b3d",
+                moonColor: "#e2bbfd",
+                moonType: "crescent",
+                mountainsColor: "#1d0a2f",
+                treesColor: "#150624",
+                groundTop: "#d800ff",
+                groundBody: "#210936",
+                lanternColor: "#ff0077",
+                bossName: "Spider Demon",
+                bossHp: 35,
+                bossDmg: 4,
+                bossColor: "#801860",
+                enemyCount: 6
+            },
+            {
+                number: 3,
+                name: "Snowy Temple",
+                skyTop: "#041226",
+                skyBottom: "#0b2545",
+                moonColor: "#e0f7fa",
+                moonType: "full",
+                mountainsColor: "#0e2038",
+                treesColor: "#091526",
+                groundTop: "#80d8ff",
+                groundBody: "#0d223a",
+                lanternColor: "#00f0ff",
+                bossName: "Blood Moon Demon",
+                bossHp: 50,
+                bossDmg: 5,
+                bossColor: "#4a1236",
+                enemyCount: 7
+            },
+            {
+                number: 4,
+                name: "Blood Moon Castle",
+                skyTop: "#240412",
+                skyBottom: "#450921",
+                moonColor: "#ff4d6d",
+                moonType: "full",
+                mountainsColor: "#300818",
+                treesColor: "#210410",
+                groundTop: "#ff2a55",
+                groundBody: "#330a1c",
+                lanternColor: "#ff2a55",
+                bossName: "Final Demon King",
+                bossHp: 50,
+                bossDmg: 5,
+                bossColor: "#6b001a",
+                enemyCount: 4
+            }
+        ];
+
+        // Canvas Setup
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+
+        // UI Element References
+        const hpBarFill = document.getElementById('hp-bar-fill');
+        const hpText = document.getElementById('hp-text');
+        const coinsText = document.getElementById('coins-text');
+        const stageText = document.getElementById('stage-text');
+        const objectiveText = document.getElementById('objective-text');
+        const messageBanner = document.getElementById('message-banner');
+        const btnRestart = document.getElementById('btn-restart');
+        const shopHpBtn = document.getElementById('shop-hp');
+        const shopDmgBtn = document.getElementById('shop-dmg');
+        const shopSpeedBtn = document.getElementById('shop-speed');
+
+        // Input Tracking State
+        const keys = {
+            left: false,
+            right: false,
+            jump: false,
+            attack: false,
+            dash: false
+        };
+
+        // Key Press Buffer Flags
+        let attackPressed = false;
+        let dashPressed = false;
+
+        // Keyboard Event Listeners
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'ArrowLeft') { keys.left = true; e.preventDefault(); }
+            if (e.code === 'ArrowRight') { keys.right = true; e.preventDefault(); }
+            if (e.code === 'ArrowUp' || e.code === 'Space') { keys.jump = true; e.preventDefault(); }
+            if (e.code === 'KeyE') {
+                if (!keys.attack) attackPressed = true;
+                keys.attack = true;
+                e.preventDefault();
+            }
+            if (e.code === 'KeyZ') {
+                if (!keys.dash) dashPressed = true;
+                keys.dash = true;
+                e.preventDefault();
+            }
+            if (e.code === 'Enter') {
+                if (gameState.gameOver || gameState.gameWon) {
+                    resetGame();
+                }
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowLeft') keys.left = false;
+            if (e.code === 'ArrowRight') keys.right = false;
+            if (e.code === 'ArrowUp' || e.code === 'Space') keys.jump = false;
+            if (e.code === 'KeyE') keys.attack = false;
+            if (e.code === 'KeyZ') keys.dash = false;
+        });
+
+        btnRestart.addEventListener('click', () => {
+            resetGame();
+        });
+
+        // --- GAME STATE VARIABLES ---
+        let gameState = {
+            currentStageIdx: 0,
+            coins: 0,
+            gameOver: false,
+            gameWon: false,
+            cameraX: 0,
+            checkpointReached: false,
+            bannerMessage: "Explore the night. Reach the blue checkpoint, then defeat the boss!"
+        };
+
+        let player = {
+            x: 80,
+            y: GROUND_Y - 36,
+            width: 24,
+            height: 36,
+            vx: 0,
+            vy: 0,
+            speed: 3.2,
+            maxHp: 20,
+            hp: 20,
+            swordDmg: 2,
+            facingRight: true,
+            isGrounded: true,
+            isAttacking: false,
+            attackTimer: 0,
+            attackCooldown: 0,
+            isDashing: false,
+            dashTimer: 0,
+            dashCooldown: 0,
+            invulnerableTimer: 0,
+            blinkTimer: 0
+        };
+
+        let companions = [
+            { id: 1, name: "Sakura", outfitColor: "#ff66aa", offset: -35, x: 45, y: GROUND_Y - 32, attackTimer: 0, facingRight: true },
+            { id: 2, name: "Ren", outfitColor: "#ff9933", offset: -65, x: 15, y: GROUND_Y - 32, attackTimer: 0, facingRight: true }
+        ];
+
+        let enemies = [];
+        let boss = null;
+        let particles = [];
+        let sceneryDetails = [];
+
+        // --- GAME LOGIC & FUNCTIONS ---
+
+        function setBannerMessage(msg) {
+            gameState.bannerMessage = msg;
+            messageBanner.textContent = msg;
+        }
+
+        function initScenery() {
+            sceneryDetails = [];
+            // Generate background lanterns and trees along level width
+            for (let x = 200; x < LEVEL_WIDTH - 200; x += 300) {
+                sceneryDetails.push({
+                    type: 'lantern',
+                    x: x + Math.random() * 50,
+                    y: GROUND_Y - 60
+                });
+            }
+            for (let x = 100; x < LEVEL_WIDTH; x += 180) {
+                sceneryDetails.push({
+                    type: 'tree',
+                    x: x + (Math.random() * 60 - 30),
+                    height: 90 + Math.random() * 40
+                });
+            }
+        }
+
+        function loadStage(stageIdx) {
+            gameState.currentStageIdx = stageIdx;
+            const config = STAGE_CONFIGS[stageIdx];
+
+            // Reset player position for new stage
+            player.x = 60;
+            player.y = GROUND_Y - player.height;
+            player.vx = 0;
+            player.vy = 0;
+            gameState.cameraX = 0;
+            gameState.checkpointReached = false;
+
+            // Align companions
+            companions.forEach(c => {
+                c.x = player.x + c.offset;
+                c.y = GROUND_Y - 32;
+            });
+
+            // Initialize Enemies
+            enemies = [];
+            const spacing = (LEVEL_WIDTH - 800) / config.enemyCount;
+            for (let i = 0; i < config.enemyCount; i++) {
+                enemies.push({
+                    id: i,
+                    x: 600 + i * spacing + Math.random() * 50,
+                    y: GROUND_Y - 30,
+                    width: 22,
+                    height: 30,
+                    hp: 8 + stageIdx * 4,
+                    maxHp: 8 + stageIdx * 4,
+                    vx: 0,
+                    vy: 0,
+                    facingRight: false,
+                    isGrounded: true,
+                    jumpTimer: Math.random() * 100,
+                    attackCooldown: 0,
+                    color: "#a82050"
+                });
+            }
+
+            // Initialize Stage Boss
+            boss = {
+                name: config.bossName,
+                x: LEVEL_WIDTH - 450,
+                y: GROUND_Y - 70,
+                width: 50,
+                height: 70,
+                hp: config.bossHp,
+                maxHp: config.bossHp,
+                damage: config.bossDmg,
+                color: config.bossColor,
+                facingRight: false,
+                isGrounded: true,
+                state: 'idle', // idle, pursuit, lunge, shockwave
+                stateTimer: 0,
+                attackCooldown: 100,
+                shockwaveActive: false,
+                shockwaveRadius: 0,
+                rewardClaimed: false,
+                alive: true
+            };
+
+            initScenery();
+            updateUI();
+            setBannerMessage(`Entered ${config.name}. Reach the blue checkpoint and defeat the ${config.bossName}!`);
+        }
+
+        function resetGame() {
+            gameState.coins = 0;
+            gameState.gameOver = false;
+            gameState.gameWon = false;
+            
+            player.maxHp = 20;
+            player.hp = 20;
+            player.swordDmg = 2;
+            player.speed = 3.2;
+
+            loadStage(0);
+        }
+
+        function triggerCheckpoint() {
+            if (!gameState.checkpointReached && player.x >= CHECKPOINT_X) {
+                gameState.checkpointReached = true;
+                setBannerMessage("Checkpoint reached! If you fall, you will return here.");
+                // Particle burst at checkpoint
+                for (let i = 0; i < 25; i++) {
+                    particles.push({
+                        x: CHECKPOINT_X,
+                        y: GROUND_Y - 40,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: -Math.random() * 5 - 1,
+                        size: Math.random() * 4 + 2,
+                        color: "#00f0ff",
+                        life: 40
+                    });
+                }
+            }
+        }
+
+        function handlePlayerDeath() {
+            if (gameState.checkpointReached) {
+                player.hp = player.maxHp;
+                player.x = CHECKPOINT_X;
+                player.y = GROUND_Y - player.height;
+                player.vx = 0;
+                player.vy = 0;
+                player.invulnerableTimer = 60;
+                setBannerMessage("Respawned at Checkpoint!");
+                updateUI();
+            } else {
+                gameState.gameOver = true;
+                setBannerMessage("HUNTER DOWN! Press ENTER or RESTART to try again.");
+                updateUI();
+            }
+        }
+
+        // --- SHOP ACTIONS ---
+        shopHpBtn.addEventListener('click', () => {
+            if (gameState.coins >= 50 && !gameState.gameOver && !gameState.gameWon) {
+                gameState.coins -= 50;
+                player.maxHp += 10;
+                player.hp = Math.min(player.maxHp, player.hp + 10);
+                setBannerMessage("Upgrade: +10 max HP. Keep going, hunter!");
+                updateUI();
+            }
+        });
+
+        shopDmgBtn.addEventListener('click', () => {
+            if (gameState.coins >= 50 && !gameState.gameOver && !gameState.gameWon) {
+                gameState.coins -= 50;
+                player.swordDmg += 2;
+                setBannerMessage("Upgrade: +2 Sword Damage applied!");
+                updateUI();
+            }
+        });
+
+        shopSpeedBtn.addEventListener('click', () => {
+            if (gameState.coins >= 50 && !gameState.gameOver && !gameState.gameWon) {
+                gameState.coins -= 50;
+                player.speed += 0.65;
+                setBannerMessage("Upgrade: You move faster now!");
+                updateUI();
+            }
+        });
+
+        function updateUI() {
+            // Update HP Bar
+            const hpPercent = Math.max(0, (player.hp / player.maxHp) * 100);
+            hpBarFill.style.width = `${hpPercent}%`;
+            hpText.textContent = `${Math.max(0, player.hp)}/${player.maxHp}`;
+            
+            // Coins
+            coinsText.textContent = gameState.coins;
+
+            // Stage Info
+            const currentStage = STAGE_CONFIGS[gameState.currentStageIdx];
+            stageText.textContent = `${currentStage.name} (${currentStage.number}/4)`;
+
+            // Objective/Boss Info
+            if (boss && boss.alive) {
+                objectiveText.textContent = `${boss.name} [HP: ${boss.hp}/${boss.maxHp}]`;
+                objectiveText.style.color = "#ff4466";
+            } else {
+                objectiveText.textContent = "THE PATH IS CLEAR • MOVE RIGHT";
+                objectiveText.style.color = "#00f0ff";
+            }
+
+            // Shop Buttons Enable/Disable
+            const disableShop = gameState.coins < 50 || gameState.gameOver || gameState.gameWon;
+            shopHpBtn.disabled = disableShop;
+            shopDmgBtn.disabled = disableShop;
+            shopSpeedBtn.disabled = disableShop;
+        }
+
+        // --- UPDATE CYCLE ---
+        function update() {
+            if (gameState.gameOver || gameState.gameWon) return;
+
+            // --- 1. Player Input & Physics ---
+            if (keys.left) {
+                player.vx = -player.speed;
+                player.facingRight = false;
+            } else if (keys.right) {
+                player.vx = player.speed;
+                player.facingRight = true;
+            } else {
+                player.vx *= 0.7; // Horizontal Friction
+            }
+
+            if (keys.jump && player.isGrounded) {
+                player.vy = -10.5;
+                player.isGrounded = false;
+                // Jump particles
+                for (let i = 0; i < 6; i++) {
+                    particles.push({
+                        x: player.x + player.width / 2,
+                        y: player.y + player.height,
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: Math.random() * 2,
+                        size: Math.random() * 3 + 1,
+                        color: "#a0c0ff",
+                        life: 15
+                    });
+                }
+            }
+
+            // Attack Handling
+            if (attackPressed && player.attackCooldown <= 0) {
+                player.isAttacking = true;
+                player.attackTimer = 12; // Frames of active attack
+                player.attackCooldown = 22;
+                attackPressed = false;
+                performPlayerAttack();
+            } else {
+                attackPressed = false;
+            }
+
+            if (player.attackTimer > 0) player.attackTimer--;
+            if (player.attackCooldown > 0) player.attackCooldown--;
+
+            // Dash Handling
+            if (dashPressed && player.dashCooldown <= 0) {
+                player.isDashing = true;
+                player.dashTimer = 12;
+                player.dashCooldown = 45;
+                dashPressed = false;
+            } else {
+                dashPressed = false;
+            }
+
+            if (player.isDashing) {
+                player.vx = (player.facingRight ? 1 : -1) * (player.speed * 2.8);
+                player.vy = 0; // Hover during dash
+                player.dashTimer--;
+                if (player.dashTimer <= 0) {
+                    player.isDashing = false;
+                }
+                // Dash streak particles
+                particles.push({
+                    x: player.x + (player.facingRight ? 0 : player.width),
+                    y: player.y + Math.random() * player.height,
+                    vx: (player.facingRight ? -1 : 1) * 3,
+                    vy: (Math.random() - 0.5) * 1,
+                    size: Math.random() * 4 + 2,
+                    color: "#00ffff",
+                    life: 12
+                });
+            }
+            if (player.dashCooldown > 0) player.dashCooldown--;
+
+            // Invulnerability & Blinking
+            if (player.invulnerableTimer > 0) player.invulnerableTimer--;
+
+            // Apply Gravity
+            if (!player.isDashing) {
+                player.vy += 0.55; // Gravity strength
+            }
+
+            // Movement Execution & Ground Collision
+            player.x += player.vx;
+            player.y += player.vy;
+
+            if (player.y >= GROUND_Y - player.height) {
+                player.y = GROUND_Y - player.height;
+                player.vy = 0;
+                player.isGrounded = true;
+            }
+
+            // Map Bounds
+            if (player.x < 0) player.x = 0;
+            if (player.x > LEVEL_WIDTH - player.width) player.x = LEVEL_WIDTH - player.width;
+
+            // Checkpoint Check
+            triggerCheckpoint();
+
+            // Stage Transition Condition
+            if (!boss.alive && player.x >= LEVEL_WIDTH - 100) {
+                if (gameState.currentStageIdx < 3) {
+                    loadStage(gameState.currentStageIdx + 1);
+                } else {
+                    // Game Won!
+                    gameState.gameWon = true;
+                    setBannerMessage("The Demon King falls. Dawn returns to the land! You won!");
+                    updateUI();
+                }
+            }
+
+            // --- 2. Camera Movement ---
+            let targetCameraX = player.x - CANVAS_WIDTH / 3;
+            if (targetCameraX < 0) targetCameraX = 0;
+            if (targetCameraX > LEVEL_WIDTH - CANVAS_WIDTH) targetCameraX = LEVEL_WIDTH - CANVAS_WIDTH;
+            gameState.cameraX += (targetCameraX - gameState.cameraX) * 0.1; // Smooth camera interpolation
+
+            // --- 3. Companion AI ---
+            companions.forEach(comp => {
+                let targetX = player.x + (player.facingRight ? comp.offset : -comp.offset);
+                let dist = targetX - comp.x;
+                comp.vx = dist * 0.08;
+                comp.x += comp.vx;
+                comp.facingRight = player.facingRight;
+
+                // Companion Combat AI
+                if (comp.attackTimer > 0) comp.attackTimer--;
+
+                if (comp.attackTimer <= 0) {
+                    // Look for nearby enemies or boss
+                    let target = null;
+                    enemies.forEach(e => {
+                        if (Math.abs(e.x - comp.x) < 70) target = e;
+                    });
+                    if (!target && boss.alive && Math.abs(boss.x - comp.x) < 90) {
+                        target = boss;
+                    }
+
+                    if (target) {
+                        comp.attackTimer = 30; // Attack cooldown
+                        target.hp -= 1; // Companion damage
+                        
+                        // Particle effect
+                        for (let k = 0; k < 4; k++) {
+                            particles.push({
+                                x: target.x + target.width / 2,
+                                y: target.y + target.height / 2,
+                                vx: (Math.random() - 0.5) * 3,
+                                vy: -Math.random() * 3 - 1,
+                                size: 3,
+                                color: comp.outfitColor,
+                                life: 15
+                            });
+                        }
+
+                        if (target !== boss && target.hp <= 0) {
+                            defeatEnemy(target);
+                        } else if (target === boss && boss.hp <= 0) {
+                            defeatBoss();
+                        }
+                    }
+                }
+            });
+
+            // --- 4. Normal Enemies AI & Logic ---
+            enemies.forEach(enemy => {
+                if (enemy.hp <= 0) return;
+
+                let distToPlayer = player.x - enemy.x;
+                if (Math.abs(distToPlayer) < 350) {
+                    enemy.facingRight = distToPlayer > 0;
+                    enemy.vx = (distToPlayer > 0 ? 1 : -1) * 1.4;
+                } else {
+                    enemy.vx = 0;
+                }
+
+                // Random enemy jump
+                enemy.jumpTimer++;
+                if (enemy.jumpTimer > 120 && enemy.isGrounded && Math.random() < 0.3) {
+                    enemy.vy = -7;
+                    enemy.isGrounded = false;
+                    enemy.jumpTimer = 0;
+                }
+
+                // Enemy gravity & floor collision
+                enemy.vy += 0.5;
+                enemy.x += enemy.vx;
+                enemy.y += enemy.vy;
+
+                if (enemy.y >= GROUND_Y - enemy.height) {
+                    enemy.y = GROUND_Y - enemy.height;
+                    enemy.vy = 0;
+                    enemy.isGrounded = true;
+                }
+
+                // Enemy-Player Collision / Damage
+                if (!player.isDashing && player.invulnerableTimer <= 0) {
+                    if (checkCollision(player, enemy)) {
+                        player.hp -= 2;
+                        player.invulnerableTimer = 45;
+                        player.vy = -4; // Knockback
+                        player.vx = enemy.facingRight ? 4 : -4;
+                        setBannerMessage("Took damage from demon!");
+                        updateUI();
+
+                        if (player.hp <= 0) handlePlayerDeath();
+                    }
+                }
+            });
+
+            // --- 5. Boss AI & Combat Patterns ---
+            if (boss && boss.alive) {
+                let distToBoss = player.x - boss.x;
+                boss.facingRight = distToBoss > 0;
+
+                boss.attackCooldown--;
+
+                if (boss.attackCooldown <= 0) {
+                    // Choose attack pattern based on distance & stage
+                    let absDist = Math.abs(distToBoss);
+                    boss.attackCooldown = Math.max(60, 120 - STAGE_CONFIGS[gameState.currentStageIdx].number * 15);
+
+                    if (absDist < 80) {
+                        // Pattern 1: Close Slash
+                        boss.state = 'close_slash';
+                        boss.stateTimer = 20;
+                        if (!player.isDashing && player.invulnerableTimer <= 0 && checkCollision(player, boss)) {
+                            player.hp -= boss.damage;
+                            player.invulnerableTimer = 45;
+                            player.vx = boss.facingRight ? 6 : -6;
+                            if (player.hp <= 0) handlePlayerDeath();
+                            updateUI();
+                        }
+                    } else if (absDist >= 80 && absDist < 250) {
+                        // Pattern 2: Forward Lunge
+                        boss.state = 'lunge';
+                        boss.stateTimer = 18;
+                        boss.vx = (boss.facingRight ? 1 : -1) * 8;
+                    } else {
+                        // Pattern 3: Area Shockwave
+                        boss.state = 'shockwave';
+                        boss.stateTimer = 30;
+                        boss.shockwaveActive = true;
+                        boss.shockwaveRadius = 10;
+                    }
+                }
+
+                // Execute Boss Movement / States
+                if (boss.state === 'lunge') {
+                    boss.x += boss.vx;
+                    boss.stateTimer--;
+                    if (checkCollision(player, boss) && !player.isDashing && player.invulnerableTimer <= 0) {
+                        player.hp -= boss.damage;
+                        player.invulnerableTimer = 45;
+                        if (player.hp <= 0) handlePlayerDeath();
+                        updateUI();
+                    }
+                    if (boss.stateTimer <= 0) boss.state = 'idle';
+                } else if (boss.state === 'shockwave') {
+                    boss.shockwaveRadius += 6;
+                    boss.stateTimer--;
+                    
+                    // Check if player is caught in shockwave radius
+                    let shockwaveX = boss.x + boss.width / 2;
+                    let distToShockwave = Math.abs((player.x + player.width / 2) - shockwaveX);
+                    if (distToShockwave < boss.shockwaveRadius && !player.isDashing && player.invulnerableTimer <= 0) {
+                        player.hp -= boss.damage;
+                        player.invulnerableTimer = 45;
+                        player.vy = -6;
+                        if (player.hp <= 0) handlePlayerDeath();
+                        updateUI();
+                    }
+
+                    if (boss.stateTimer <= 0) {
+                        boss.state = 'idle';
+                        boss.shockwaveActive = false;
+                    }
+                } else {
+                    // Normal Pursuit
+                    if (Math.abs(distToBoss) < 400) {
+                        boss.x += (distToBoss > 0 ? 1 : -1) * 1.2;
+                    }
+                }
+
+                // Boss Bounds
+                if (boss.x < 100) boss.x = 100;
+                if (boss.x > LEVEL_WIDTH - boss.width) boss.x = LEVEL_WIDTH - boss.width;
+            }
+
+            // --- 6. Particles Update ---
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+
+        function performPlayerAttack() {
+            // Player Attack Hitbox Creation
+            const attackRange = 55;
+            const attackBox = {
+                x: player.facingRight ? player.x + player.width : player.x - attackRange,
+                y: player.y - 10,
+                width: attackRange,
+                height: player.height + 20
+            };
+
+            // Slash FX Particles
+            for (let i = 0; i < 10; i++) {
+                particles.push({
+                    x: attackBox.x + Math.random() * attackBox.width,
+                    y: attackBox.y + Math.random() * attackBox.height,
+                    vx: (player.facingRight ? 1 : -1) * (Math.random() * 4 + 2),
+                    vy: (Math.random() - 0.5) * 3,
+                    size: Math.random() * 3 + 2,
+                    color: "#00ffff",
+                    life: 15
+                });
+            }
+
+            // Check hit against normal enemies
+            enemies.forEach(enemy => {
+                if (enemy.hp > 0 && checkCollision(attackBox, enemy)) {
+                    enemy.hp -= player.swordDmg;
+                    // Spawn hit particles
+                    for (let k = 0; k < 6; k++) {
+                        particles.push({
+                            x: enemy.x + enemy.width / 2,
+                            y: enemy.y + enemy.height / 2,
+                            vx: (Math.random() - 0.5) * 5,
+                            vy: -Math.random() * 4 - 1,
+                            size: 3,
+                            color: "#ff0055",
+                            life: 20
+                        });
+                    }
+
+                    if (enemy.hp <= 0) {
+                        defeatEnemy(enemy);
+                    }
+                }
+            });
+
+            // Check hit against boss
+            if (boss && boss.alive && checkCollision(attackBox, boss)) {
+                boss.hp -= player.swordDmg;
+                // Spawn boss hit particles
+                for (let k = 0; k < 8; k++) {
+                    particles.push({
+                        x: boss.x + boss.width / 2,
+                        y: boss.y + boss.height / 2,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: -Math.random() * 5 - 1,
+                        size: 4,
+                        color: "#00ffff",
+                        life: 22
+                    });
+                }
+
+                if (boss.hp <= 0) {
+                    defeatBoss();
+                } else {
+                    updateUI();
+                }
+            }
+        }
+
+        function defeatEnemy(enemy) {
+            gameState.coins += 5;
+            setBannerMessage("Demon defeated! +5 coins.");
+            updateUI();
+            
+            // Defeat particles
+            for (let i = 0; i < 15; i++) {
+                particles.push({
+                    x: enemy.x + enemy.width / 2,
+                    y: enemy.y + enemy.height / 2,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    size: Math.random() * 4 + 2,
+                    color: "#aa0044",
+                    life: 25
+                });
+            }
+        }
+
+        function defeatBoss() {
+            boss.alive = false;
+            boss.hp = 0;
+            if (!boss.rewardClaimed) {
+                boss.rewardClaimed = true;
+                gameState.coins += 50;
+                setBannerMessage(`${boss.name} Defeated! +50 Coins earned. Move right to advance!`);
+            }
+            updateUI();
+
+            // Huge boss defeat particle explosion
+            for (let i = 0; i < 40; i++) {
+                particles.push({
+                    x: boss.x + boss.width / 2,
+                    y: boss.y + boss.height / 2,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10,
+                    size: Math.random() * 6 + 3,
+                    color: "#ff0055",
+                    life: 40
+                });
+            }
+        }
+
+        function checkCollision(r1, r2) {
+            return !(r2.x > r1.x + r1.width ||
+                     r2.x + r2.width < r1.x ||
+                     r2.y > r1.y + r1.height ||
+                     r2.y + r2.height < r1.y);
+        }
+
+        // --- RENDER CYCLE ---
+        function render() {
+            const config = STAGE_CONFIGS[gameState.currentStageIdx];
+
+            // 1. Clear Canvas & Background Gradient
+            let skyGrad = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+            skyGrad.addColorStop(0, config.skyTop);
+            skyGrad.addColorStop(1, config.skyBottom);
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            // 2. Stars & Moon (Parallax Background)
+            drawMoonAndStars(config);
+
+            // 3. Mountains (Parallax layer 1)
+            drawMountains(config);
+
+            // 4. Parallax Trees & Scenery (Layer 2)
+            drawScenery(config);
+
+            // Save context for camera transformation
+            ctx.save();
+            ctx.translate(-Math.floor(gameState.cameraX), 0);
+
+            // 5. Ground rendering
+            drawGround(config);
+
+            // 6. Checkpoint Marker
+            drawCheckpoint();
+
+            // 7. Render Normal Enemies
+            enemies.forEach(enemy => {
+                if (enemy.hp > 0) drawEnemy(enemy);
+            });
+
+            // 8. Render Boss
+            if (boss && boss.alive) {
+                drawBoss(boss);
+            }
+
+            // 9. Render Companions
+            companions.forEach(comp => {
+                drawCompanion(comp);
+            });
+
+            // 10. Render Player
+            drawPlayer();
+
+            // 11. Render Particles
+            particles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.fillRect(Math.floor(p.x), Math.floor(p.y), Math.floor(p.size), Math.floor(p.size));
+            });
+
+            ctx.restore();
+
+            // 12. Overlays (Canvas HUD & Game Over/Victory Overlays)
+            drawCanvasOverlays(config);
+        }
+
+        function drawMoonAndStars(config) {
+            ctx.fillStyle = "#ffffff";
+            // Fixed pixel stars based on deterministic math
+            for (let i = 0; i < 35; i++) {
+                let sx = (i * 137) % CANVAS_WIDTH;
+                let sy = (i * 83) % 220;
+                ctx.fillRect(sx, sy, (i % 2 === 0 ? 2 : 1), (i % 2 === 0 ? 2 : 1));
+            }
+
+            // Moon
+            let moonX = CANVAS_WIDTH - 150;
+            let moonY = 80;
+            ctx.fillStyle = config.moonColor;
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, 32, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (config.moonType === "crescent") {
+                ctx.fillStyle = config.skyTop;
+                ctx.beginPath();
+                ctx.arc(moonX + 12, moonY - 6, 28, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawMountains(config) {
+            ctx.fillStyle = config.mountainsColor;
+            ctx.beginPath();
+            let startX = -(gameState.cameraX * 0.2) % 300;
+            ctx.moveTo(startX - 300, GROUND_Y);
+
+            for (let x = startX - 300; x < CANVAS_WIDTH + 300; x += 150) {
+                let mountainHeight = (Math.sin(x * 0.01) * 50) + 120;
+                ctx.lineTo(x, GROUND_Y - mountainHeight);
+            }
+            ctx.lineTo(CANVAS_WIDTH + 300, GROUND_Y);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawScenery(config) {
+            sceneryDetails.forEach(item => {
+                let screenX = item.x - gameState.cameraX * 0.5;
+                if (screenX > -100 && screenX < CANVAS_WIDTH + 100) {
+                    if (item.type === 'tree') {
+                        // Pixelated Tree
+                        ctx.fillStyle = config.treesColor;
+                        ctx.fillRect(screenX, GROUND_Y - item.height, 16, item.height);
+                        ctx.fillRect(screenX - 20, GROUND_Y - item.height - 30, 56, 40);
+                        ctx.fillRect(screenX - 12, GROUND_Y - item.height - 50, 40, 25);
+                    } else if (item.type === 'lantern') {
+                        // Glowing Lantern
+                        ctx.fillStyle = "#333";
+                        ctx.fillRect(screenX + 6, item.y, 4, GROUND_Y - item.y);
+                        ctx.fillStyle = config.lanternColor;
+                        ctx.fillRect(screenX, item.y, 16, 16);
+                        ctx.fillStyle = "#ffffff";
+                        ctx.fillRect(screenX + 4, item.y + 4, 8, 8);
+                    }
+                }
+            });
+        }
+
+        function drawGround(config) {
+            // Main ground body
+            ctx.fillStyle = config.groundBody;
+            ctx.fillRect(0, GROUND_Y, LEVEL_WIDTH, CANVAS_HEIGHT - GROUND_Y);
+
+            // Illuminated edge
+            ctx.fillStyle = config.groundTop;
+            ctx.fillRect(0, GROUND_Y, LEVEL_WIDTH, 4);
+        }
+
+        function drawCheckpoint() {
+            ctx.fillStyle = gameState.checkpointReached ? "#00f0ff" : "#1a4d6e";
+            ctx.fillRect(CHECKPOINT_X - 10, GROUND_Y - 50, 6, 50); // Pole
+            ctx.fillRect(CHECKPOINT_X - 10, GROUND_Y - 50, 30, 20); // Banner
+
+            // Cyan glow effect
+            ctx.fillStyle = "rgba(0, 240, 255, 0.3)";
+            ctx.fillRect(CHECKPOINT_X - 15, GROUND_Y - 55, 40, 55);
+        }
+
+        function drawPlayer() {
+            // Blinking effect during invulnerability
+            if (player.invulnerableTimer % 6 > 3) return;
+
+            ctx.save();
+            ctx.translate(Math.floor(player.x), Math.floor(player.y));
+
+            // Player Shadow
+            ctx.fillStyle = "rgba(0,0,0,0.4)";
+            ctx.beginPath();
+            ctx.ellipse(player.width / 2, player.height, 12, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Facing Direction Flip
+            if (!player.facingRight) {
+                ctx.translate(player.width, 0);
+                ctx.scale(-1, 1);
+            }
+
+            // Head & Hair
+            ctx.fillStyle = "#ffdbac"; // Skin
+            ctx.fillRect(6, 4, 12, 10);
+            ctx.fillStyle = "#1a1a2e"; // Dark Hair
+            ctx.fillRect(4, 2, 16, 6);
+
+            // Dark-Green Outfit
+            ctx.fillStyle = "#0f5233";
+            ctx.fillRect(4, 14, 16, 14);
+
+            // Arms / Legs
+            ctx.fillStyle = "#0a3822";
+            ctx.fillRect(2, 16, 4, 10); // Arm
+            ctx.fillRect(6, 28, 5, 8);  // Leg L
+            ctx.fillRect(13, 28, 5, 8); // Leg R
+
+            // Sword
+            ctx.fillStyle = "#ffd700"; // Gold Hilt
+            ctx.fillRect(18, 16, 4, 4);
+            ctx.fillStyle = "#80d8ff"; // Light Blue Blade
+            
+            if (player.isAttacking) {
+                // Slash Animation Angle
+                ctx.fillRect(18, 6, 18, 4);
+            } else {
+                ctx.fillRect(20, 8, 4, 16);
+            }
+
+            ctx.restore();
+        }
+
+        function drawCompanion(comp) {
+            ctx.save();
+            ctx.translate(Math.floor(comp.x), Math.floor(comp.y));
+
+            // Shadow
+            ctx.fillStyle = "rgba(0,0,0,0.4)";
+            ctx.beginPath();
+            ctx.ellipse(10, 32, 10, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (!comp.facingRight) {
+                ctx.translate(20, 0);
+                ctx.scale(-1, 1);
+            }
+
+            // Head & Skin
+            ctx.fillStyle = "#ffe0bd";
+            ctx.fillRect(4, 4, 12, 10);
+
+            // Companion Outfit
+            ctx.fillStyle = comp.outfitColor;
+            ctx.fillRect(4, 14, 12, 12);
+
+            // Sword
+            ctx.fillStyle = "#cccccc";
+            ctx.fillRect(16, 12, 3, 14);
+
+            ctx.restore();
+        }
+
+        function drawEnemy(enemy) {
+            ctx.save();
+            ctx.translate(Math.floor(enemy.x), Math.floor(enemy.y));
+
+            // Magenta Body
+            ctx.fillStyle = "#8a0f4d";
+            ctx.fillRect(2, 8, 18, 18);
+
+            // Purple Head
+            ctx.fillStyle = "#4a0e4e";
+            ctx.fillRect(4, 0, 14, 10);
+
+            // Glowing Red Eyes
+            ctx.fillStyle = "#ff0033";
+            ctx.fillRect(enemy.facingRight ? 12 : 4, 3, 3, 3);
+
+            // Legs
+            ctx.fillStyle = "#2d0530";
+            ctx.fillRect(4, 26, 5, 4);
+            ctx.fillRect(13, 26, 5, 4);
+
+            // Mini HP Bar
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, -8, 22, 4);
+            ctx.fillStyle = "#ff0055";
+            ctx.fillRect(0, -8, (enemy.hp / enemy.maxHp) * 22, 4);
+
+            ctx.restore();
+        }
+
+        function drawBoss(b) {
+            ctx.save();
+            ctx.translate(Math.floor(b.x), Math.floor(b.y));
+
+            // Large Pixel Art Boss Model
+            ctx.fillStyle = b.color;
+            ctx.fillRect(5, 15, b.width - 10, b.height - 20);
+
+            // Head
+            ctx.fillStyle = "#2d0015";
+            ctx.fillRect(10, 0, b.width - 20, 20);
+
+            // Glowing Eyes
+            ctx.fillStyle = "#ff0000";
+            let eyeX = b.facingRight ? b.width - 20 : 12;
+            ctx.fillRect(eyeX, 6, 6, 6);
+
+            // Boss Shockwave Visual Attack Effect
+            if (b.shockwaveActive) {
+                ctx.strokeStyle = "#ff0055";
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(b.width / 2, b.height, b.shockwaveRadius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        function drawCanvasOverlays(config) {
+            // Stage Name Banner Bottom-Left
+            ctx.fillStyle = "rgba(5, 10, 20, 0.75)";
+            ctx.fillRect(15, CANVAS_HEIGHT - 40, 220, 28);
+            ctx.strokeStyle = "#00f0ff";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(15, CANVAS_HEIGHT - 40, 220, 28);
+            ctx.fillStyle = "#00f0ff";
+            ctx.font = "bold 12px sans-serif";
+            ctx.fillText(`STAGE ${config.number}: ${config.name.toUpperCase()}`, 25, CANVAS_HEIGHT - 22);
+
+            // Stage Warning / Clear Overlay Top-Center
+            ctx.fillStyle = "rgba(5, 10, 20, 0.75)";
+            ctx.fillRect(CANVAS_WIDTH / 2 - 140, 15, 280, 26);
+            ctx.font = "bold 11px sans-serif";
+            ctx.textAlign = "center";
+
+            if (boss && boss.alive) {
+                ctx.fillStyle = "#ff3355";
+                ctx.fillText("DEMONS AHEAD • STAY ALERT", CANVAS_WIDTH / 2, 32);
+
+                // Boss Top Canvas HP Bar
+                ctx.fillStyle = "rgba(0,0,0,0.6)";
+                ctx.fillRect(CANVAS_WIDTH / 2 - 150, 48, 300, 12);
+                ctx.fillStyle = "#ff0055";
+                ctx.fillRect(CANVAS_WIDTH / 2 - 150, 48, (boss.hp / boss.maxHp) * 300, 12);
+                ctx.strokeStyle = "#ffffff";
+                ctx.strokeRect(CANVAS_WIDTH / 2 - 150, 48, 300, 12);
+
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "10px sans-serif";
+                ctx.fillText(`${boss.name}`, CANVAS_WIDTH / 2, 57);
+            } else {
+                ctx.fillStyle = "#00f0ff";
+                ctx.fillText("THE PATH IS CLEAR • MOVE RIGHT", CANVAS_WIDTH / 2, 32);
+            }
+
+            // --- GAME OVER OVERLAY ---
+            if (gameState.gameOver) {
+                ctx.fillStyle = "rgba(5, 5, 15, 0.85)";
+                ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+                ctx.fillStyle = "#ff2a55";
+                ctx.font = "bold 36px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("HUNTER DOWN", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 20);
+
+                ctx.fillStyle = "#d0e0ff";
+                ctx.font = "16px sans-serif";
+                ctx.fillText("Press ENTER or click RESTART to try again.", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 25);
+            }
+
+            // --- VICTORY OVERLAY ---
+            if (gameState.gameWon) {
+                ctx.fillStyle = "rgba(5, 15, 30, 0.88)";
+                ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+                ctx.fillStyle = "#00f0ff";
+                ctx.font = "bold 38px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("DAWN HAS COME", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 30);
+
+                ctx.fillStyle = "#ffd700";
+                ctx.font = "bold 18px sans-serif";
+                ctx.fillText("You defeated the Demon King!", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 10);
+
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "14px sans-serif";
+                ctx.fillText("The Demon King falls. Dawn returns to the land! You won!", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 40);
+                ctx.fillText("Press ENTER or RESTART to play again.", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 70);
+            }
+
+            ctx.textAlign = "left"; // Reset alignment
+        }
+
+        // --- MAIN GAME LOOP ---
+        function gameLoop() {
+            update();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            loadStage(0);
+            requestAnimationFrame(gameLoop);
+        };
+    </script>
+</body>
+</html>
